@@ -1,0 +1,18 @@
+# Builds
+*.love
+build/
+dist/
+release/
+
+# Lua
+*.luac
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Éditeurs
+*.swp
+*~
+.idea/

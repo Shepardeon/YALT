@@ -1,0 +1,22 @@
+{
+    "Lua.runtime.version": "LuaJIT",
+    "Lua.workspace.library": [
+        "${3rd}/love2d/library",
+        "lldebugger"
+    ],
+    "Lua.workspace.checkThirdParty": false,
+    "cSpell.words": [
+        "appimage",
+        "errorhandler",
+        "hotswap",
+        "hotswapping",
+        "keypressed",
+        "lldebugger",
+        "LÖVE",
+        "lovejs",
+        "lume",
+        "Sheepolution's"
+    ],
+    "cSpell.ignorePaths": [".vscode", "lib/**"],
+    "Lua.diagnostics.globals": ["lldebugger"],
+}
