@@ -6,6 +6,7 @@ G = {
     Input       = require("core.input"),
     Screen      = require("core.screen"),
     Animations  = require("core.animations"),
+    Camera      = require("core.camera"),
     Audio       = require("core.audio"),
     Fsm         = require("core.fsm"),
     UI          = require("core.ui")

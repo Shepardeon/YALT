@@ -41,9 +41,14 @@ function Camera:update(dt)
     self.shakeY = self.maxShake * power * (love.math.noise(0, self.time * 25) * 2 - 1)
 end
 
-function Camera:attach()
+function Camera:attach(fx, fy)
+    fx = fx or 1
+    fy = fy or fx
     love.graphics.push()
-    love.graphics.translate(-math.floor(self.x + self.shakeX), -math.floor(self.y + self.shakeY))
+    love.graphics.translate(
+        -math.floor(self.x * fx + self.shakeX),
+        -math.floor(self.y * fy + self.shakeY)
+    )
 end
 
 function Camera:detach()
