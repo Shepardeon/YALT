@@ -7,7 +7,8 @@ G = {
     Screen      = require("core.screen"),
     Animations  = require("core.animations"),
     Audio       = require("core.audio"),
-    Fsm         = require("core.fsm")
+    Fsm         = require("core.fsm"),
+    UI          = require("core.ui")
 }
 
 setmetatable(_G, {
@@ -26,6 +27,7 @@ function love.load()
 end
 
 function love.update(dt)
+    G.Audio.update(dt)
     G.Scenes.update(dt)
     G.Input.endFrame()
 end
@@ -42,4 +44,8 @@ end
 
 function love.keypressed(key)
     G.Input.keypressed(key)
+end
+
+function love.mousepressed(x, y, button)
+    G.Input.mousepressed(x, y, button)
 end

@@ -11,7 +11,7 @@ local function serialize(val, indent)
         local parts, nextIndent = {}, indent.."    "
         for k, v in pairs(val) do
             local key = type(k) == "string" and string.format("[%q]", k) or "["..k.."]"
-            table.insert(parts, nextIndent..key.." = "..serialize(val, nextIndent))
+            table.insert(parts, nextIndent..key.." = "..serialize(v, nextIndent))
         end
         return "{\n"..table.concat(parts, ",\n").."\n"..indent.."}"
     end
@@ -27,6 +27,8 @@ local function fillDefaults(data, defaults)
             fillDefaults(data[k], v)
         end
     end
+
+    return data
 end
 
 local function migrate(data)

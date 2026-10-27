@@ -3,7 +3,14 @@ local Input = {
         left = { "left", "q", "a" },
         right = { "right", "d" },
         up = { "up", "z", "w" },
-        down = { "down", "s" }
+        down = { "down", "s" },
+
+        ui_up = { "up", "z", "w" },
+        ui_down = { "down", "s" },
+        ui_left = { "left", "q", "a" },
+        ui_right = { "right", "d" },
+        ui_confirm = { "return", "space" },
+        ui_back = { "escape", "backspace" }
     },
     pressedThisFrame = {}
 }
@@ -24,6 +31,12 @@ function Input.keypressed(key)
         for _, k in ipairs(keys) do
             if k == key then Input.pressedThisFrame[action] = true end
         end
+    end
+end
+
+function Input.mousepressed(x, y, button)
+    if button == 1 then
+        Input.pressedThisFrame.click = true
     end
 end
 

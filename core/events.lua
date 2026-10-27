@@ -14,7 +14,7 @@ function Events.off(name, fn)
 end
 
 function Events.emit(name, ...)
-    for _, fn in ipairs(Events.handlers[name]) do
+    for _, fn in ipairs(Events.handlers[name] or {}) do
         fn(...)
     end
 end

@@ -40,11 +40,12 @@ function Audio.play(name)
             src = source
             break
         end
-        if not src then
-            src = pool.sources[pool.next]
-            pool.next = pool.next % #pool.sources + 1
-            src:stop()
-        end
+    end
+
+    if not src then
+        src = pool.sources[pool.next]
+        pool.next = pool.next % #pool.sources + 1
+        src:stop()
     end
 
     local variation = def.pitch or 0
@@ -57,7 +58,7 @@ end
 
 function Audio.playMusic(name, fadeTime)
     if Audio.music and Audio.music.name == name then return end
-    local speed = 1 / math.max(fadeTime, 1, 0.001)
+    local speed = 1 / math.max(fadeTime or 1, 1, 0.001)
 
     if Audio.music then
         Audio.music.target, Audio.music.speed = 0, speed

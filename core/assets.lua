@@ -2,7 +2,7 @@ local Assets = { images = {}, sounds = {}, musics = {}, shaders = {} }
 
 function Assets.image(name)
     if not Assets.images[name] then
-        Assets.images[name] = love.graphics.newImage("assets/images"..name..".png")
+        Assets.images[name] = love.graphics.newImage("assets/images/"..name..".png")
     end
     return Assets.images[name]
 end
