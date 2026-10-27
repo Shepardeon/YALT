@@ -7,6 +7,7 @@ G = {
     Screen      = require("core.screen"),
     Animations  = require("core.animations"),
     Camera      = require("core.camera"),
+    Parallax    = require("core.parallax"),
     Audio       = require("core.audio"),
     Fsm         = require("core.fsm"),
     UI          = require("core.ui")

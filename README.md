@@ -63,7 +63,8 @@ conf.lua    configuration de la fenêtre et du mode debug
 | `Fsm`        | machine à états pour les entités                            |
 | `Events`     | bus d'événements (`on`, `off`, `emit`)                      |
 | `Save`       | sauvegarde sérialisée en Lua dans le dossier de LÖVE        |
-| `Camera`     | suivi lissé, limites et tremblement (`require("core.camera")`) |
+| `Camera`     | suivi lissé, limites, tremblement et couches                |
+| `Parallax`   | arrière-plans et premiers plans en défilement parallaxe     |
 
 > Les variables globales sont interdites : toute affectation globale hors de `G` lève une erreur (oubli de `local`).
 
@@ -125,7 +126,7 @@ G.Input.bindings.dash = { "lshift", "x" }
 
 ### Interface (`UI`)
 
-L'interface se décrit comme un arbre de nœuds, recalculé à chaque frame. Les propriétés peuvent être des fonctions pour afficher des valeurs dynamiques.
+L'interface se décrit comme un arbre de nœuds, recalculé à chaque frame. Toutes les propriétés, sauf les callbacks (`onPress`, `onChange`), peuvent être des fonctions : elles sont réévaluées à chaque frame (textes, valeurs, tailles, marges, couleurs, polices, visibilité…).
 
 ```lua
 local menu = G.UI.new(
@@ -149,9 +150,32 @@ menu:draw()
 - **Conteneurs** : `column`, `row`, `panel` (colonne avec fond), options `padding`, `gap`, `align` (`start`, `center`, `end`)
 - **Éléments** : `text`, `button`, `slider`, `bar`, `image`, `spacer`
 - **Communs** : `visible`, `w`, `h`, `font`, `color`, `bg` ; `disabled` pour les boutons et sliders
+- **Par élément** :
+  - `text`, `button` : libellé en premier élément (`{ "Jouer" }`) ou via `label`
+  - `button` : `onPress`, `padding`, `focus` (couleur quand il a le focus)
+  - `slider` : `value` (entre 0 et 1), `onChange`, `step` (0.1 par défaut), `width`, `height`, `focus`
+  - `bar` : `value`, `max` (1 par défaut), `width`, `height`
+  - `image` : `image`, `scale`
+  - `spacer` : `width`, `height`
 - **Options de `UI.new`** : `anchor` (`topLeft`, `top`, …, `center`, …, `bottomRight`), `margin`, `interactive`, `onBack`
 - **Thème** : `UI.setTheme({ ... })` pour changer couleurs, polices (`fonts.normal`, `fonts.title`), `padding` et `gap`
 - **Événements** émis sur `Events` : `ui_move`, `ui_confirm`, `ui_change` (pour brancher des sons, par exemple)
+
+Exemple de HUD non interactif dont la jauge s'adapte aux points de vie maximum :
+
+```lua
+local hud = G.UI.new(
+    G.UI.row {
+        G.UI.text { function() return "PV " .. player.hp end },
+        G.UI.bar {
+            value = function() return player.hp end,
+            max = function() return player.maxHp end,
+            width = function() return player.maxHp * 8 end,
+        },
+    },
+    { anchor = "topLeft", interactive = false }
+)
+```
 
 ### Ressources (`Assets`)
 
@@ -286,12 +310,10 @@ G.Save.write(data)
 
 ### Caméra (`Camera`)
 
-La caméra n'est pas dans `G`, elle se crée par scène :
+Chaque scène crée sa propre caméra :
 
 ```lua
-local Camera = require("core.camera")
-
-local cam = Camera.new(G.Screen.w, G.Screen.h)
+local cam = G.Camera.new(G.Screen.w, G.Screen.h)
 cam.bounds = { x = 0, y = 0, w = mapW, h = mapH }  -- optionnel
 
 -- update
@@ -309,6 +331,50 @@ local wx, wy = cam:toWorld(G.Screen.toGame(love.mouse.getPosition()))
 ```
 
 Réglages : `smooth` (vitesse de suivi), `maxShake` (en pixels), `decay` (amortissement du tremblement).
+
+`attach(fx, fy)` applique un facteur de défilement pour dessiner une couche qui bouge plus ou moins vite que le monde (`fy` vaut `fx` par défaut). Le tremblement reste appliqué en entier.
+
+```lua
+cam:attach(0.5)     -- couche lointaine : défile deux fois moins vite
+-- ...
+cam:detach()
+
+cam:attach(0.5, 0)  -- suit la caméra horizontalement seulement
+```
+
+### Parallaxe (`Parallax`)
+
+Une liste de couches d'images, de la plus lointaine à la plus proche. Les couches se dessinent en coordonnées écran, hors de `attach` / `detach`, en suivant la caméra passée en paramètre.
+
+```lua
+local bg = G.Parallax.new({
+    { image = "bg/sky" },                                           -- fixe
+    { image = "bg/clouds", fx = 0.1, repeatX = true, speed = 6 },   -- défile seule
+    { image = "bg/hills",  fx = 0.4, fy = 0, y = 100, repeatX = true }, -- hauteur fixe
+    { image = "bg/grass",  fx = 1.4, y = 160, repeatX = true, front = true },
+})
+
+-- update
+bg:update(dt)
+
+-- draw
+bg:drawBack(cam)
+cam:attach()
+-- ... monde
+cam:detach()
+bg:drawFront(cam)
+-- ... HUD
+```
+
+Options d'une couche :
+
+- `image` : nom de l'image (voir `Assets`)
+- `fx`, `fy` : facteurs de défilement horizontal et vertical (0 : fixe ; 1 : suit le monde ; plus de 1 : premier plan). `fx` vaut 0 par défaut et `fy` vaut `fx`, comme pour `Camera:attach`
+- `y` : position verticale à l'écran quand la caméra est en haut (`cam.y = 0`)
+- `repeatX` : répète l'image horizontalement pour couvrir l'écran
+- `speed` : défilement automatique en px/s vers la gauche (seulement avec `repeatX`)
+- `tint` : couleur appliquée à l'image (`{ r, g, b, a }`)
+- `front` : dessinée par `drawFront`, devant le monde, au lieu de `drawBack`
 
 ## Bibliothèques
 

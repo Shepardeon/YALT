@@ -43,7 +43,7 @@ local function clamp01(val)
 end
 
 local function fontOf(props)
-    return UI.theme.fonts[props.font or "normal"] or lg.getFont()
+    return UI.theme.fonts[get(props.font) or "normal"] or lg.getFont()
 end
 
 local function inside(n, x, y)
@@ -92,30 +92,30 @@ end
 
 function measure.button(n)
     local w, h = measure.text(n)
-    local p = n.props.padding or UI.theme.padding
+    local p = get(n.props.padding) or UI.theme.padding
     return w + p * 2, h + p * 2
 end
 
 function measure.image(n)
-    local img, scale = get(n.props.image), n.props.scale or 1
+    local img, scale = get(n.props.image), get(n.props.scale) or 1
     return img:getWidth() * scale, img:getHeight() * scale
 end
 
 function measure.bar(n)
-    return n.props.width or 40, n.props.height or 4
+    return get(n.props.width) or 40, get(n.props.height) or 4
 end
 
 function measure.slider(n)
-    return n.props.width or 60, n.props.height or 6
+    return get(n.props.width) or 60, get(n.props.height) or 6
 end
 
 function measure.spacer(n)
-    return n.props.width or 0, n.props.height or 0
+    return get(n.props.width) or 0, get(n.props.height) or 0
 end
 
 local function stack(n, vertical)
-    local p = n.props.padding or UI.theme.padding
-    local gap = n.props.gap or UI.theme.gap
+    local p = get(n.props.padding) or UI.theme.padding
+    local gap = get(n.props.gap) or UI.theme.gap
     local main, cross, count = 0, 0, 0
 
     for _, c in ipairs(n.children) do
@@ -149,7 +149,7 @@ local function doMeasure(n)
     for _, c in ipairs(n.children) do doMeasure(c) end
 
     local w, h = measure[n.kind](n)
-    n.w, n.h = n.props.w or w, n.props.h or h
+    n.w, n.h = get(n.props.w) or w, get(n.props.h) or h
 end
 
 -- Placement
@@ -158,9 +158,9 @@ local function place(n, x, y)
     n.x, n.y = math.floor(x), math.floor(y)
     if not containers[n.kind] then return end
 
-    local p = n.props.padding or UI.theme.padding
-    local gap = n.props.gap or UI.theme.gap
-    local align = n.props.align or "start"
+    local p = get(n.props.padding) or UI.theme.padding
+    local gap = get(n.props.gap) or UI.theme.gap
+    local align = get(n.props.align) or "start"
     local vertical = n.kind == "column"
     local cursor = vertical and (y + p) or (x + p)
 
@@ -192,7 +192,7 @@ end
 local draw = {}
 
 function draw.column(n)
-    local bg = n.props.bg
+    local bg = get(n.props.bg)
     if bg then
         lg.setColor(bg == true and UI.theme.panel or bg)
         lg.rectangle("fill", n.x, n.y, n.w, n.h)
@@ -207,7 +207,7 @@ function draw.text(n)
 end
 
 function draw.button(n, focused)
-    local p = n.props.padding or UI.theme.padding
+    local p = get(n.props.padding) or UI.theme.padding
     lg.setColor(focused and (get(n.props.focus) or UI.theme.focus) or (get(n.props.bg) or UI.theme.button))
     lg.rectangle("fill", n.x, n.y, n.w, n.h)
     lg.setFont(fontOf(n.props))
@@ -216,7 +216,7 @@ function draw.button(n, focused)
 end
 
 function draw.image(n)
-    local scale = n.props.scale or 1
+    local scale = get(n.props.scale) or 1
     lg.setColor(get(n.props.color) or { 1, 1, 1, 1 })
     lg.draw(get(n.props.image), n.x, n.y, 0, scale, scale)
 end
@@ -337,7 +337,7 @@ function Root:update(dt)
     if Input.isPressed("ui_down") then self:moveFocus(1) return end
 
     if cur.kind == "slider" then
-        local step = cur.props.step or 0.1
+        local step = get(cur.props.step) or 0.1
         if Input.isPressed("ui_left") then setSlider(cur, get(cur.props.value) - step) end
         if Input.isPressed("ui_right") then setSlider(cur, get(cur.props.value) + step) end
     else
